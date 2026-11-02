@@ -1,30 +1,36 @@
 services:
     - type: web
       name: opnform
-      env: docker
+      runtime: docker
       repo: https://github.com/Ageneh/OpnForm
       branch: main
       plan: starter
+      region: frankfurt # all resources must share a region
+      # dockerfilePath: ./docker/Dockerfile.api  # set if the Dockerfile isn't at the repo root
       envVars:
           - key: APP_NAME
             value: OpnForm
           - key: APP_ENV
             value: production
           - key: APP_DEBUG
-            value: false
+            value: "false"
           - key: APP_KEY
-            generateValue: true
+            sync: false # paste output of: php artisan key:generate --show
           - key: APP_URL
-            sync: false # Set this to your custom domain in the Render dashboard after deployment
+            sync: false
           - key: DB_CONNECTION
             value: pgsql
           - key: DATABASE_URL
             fromDatabase:
                 name: opnform-db
                 property: connectionString
+          - key: DB_URL
+            fromDatabase:
+                name: opnform-db
+                property: connectionString
           - key: REDIS_URL
             fromService:
-                type: redis
+                type: keyvalue
                 name: opnform-redis
                 property: connectionString
           - key: MAIL_MAILER
@@ -42,15 +48,18 @@ services:
           - key: MAIL_FROM_ADDRESS
             sync: false
           - key: MAIL_FROM_NAME
-            value: "OpnForm"
+            value: OpnForm
+
+    - type: keyvalue
+      name: opnform-redis
+      plan: starter
+      region: frankfurt
+      maxmemoryPolicy: noeviction
+      ipAllowList: [] # internal access only
 
 databases:
     - name: opnform-db
       databaseName: opnform
       user: opnform
-      plan: starter
-
-    - name: opnform-redis
-      type: redis
-      plan: starter
-      maxmemoryPolicy: noeviction
+      plan: basic-256mb
+      region: frankfurt
