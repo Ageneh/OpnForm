@@ -1,0 +1,56 @@
+services:
+    - type: web
+      name: opnform
+      env: docker
+      repo: https://github.com/Ageneh/OpnForm
+      branch: main
+      plan: starter
+      envVars:
+          - key: APP_NAME
+            value: OpnForm
+          - key: APP_ENV
+            value: production
+          - key: APP_DEBUG
+            value: false
+          - key: APP_KEY
+            generateValue: true
+          - key: APP_URL
+            sync: false # Set this to your custom domain in the Render dashboard after deployment
+          - key: DB_CONNECTION
+            value: pgsql
+          - key: DATABASE_URL
+            fromDatabase:
+                name: opnform-db
+                property: connectionString
+          - key: REDIS_URL
+            fromService:
+                type: redis
+                name: opnform-redis
+                property: connectionString
+          - key: MAIL_MAILER
+            value: smtp
+          - key: MAIL_HOST
+            sync: false
+          - key: MAIL_PORT
+            sync: false
+          - key: MAIL_USERNAME
+            sync: false
+          - key: MAIL_PASSWORD
+            sync: false
+          - key: MAIL_ENCRYPTION
+            value: tls
+          - key: MAIL_FROM_ADDRESS
+            sync: false
+          - key: MAIL_FROM_NAME
+            value: "OpnForm"
+
+databases:
+    - name: opnform-db
+      databaseName: opnform
+      user: opnform
+      plan: starter
+
+    - name: opnform-redis
+      type: redis
+      plan: starter
+      maxmemoryPolicy: noeviction
